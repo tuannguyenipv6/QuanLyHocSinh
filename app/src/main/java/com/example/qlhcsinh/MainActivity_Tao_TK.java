@@ -68,7 +68,7 @@ public class MainActivity_Tao_TK extends AppCompatActivity {
         dialog.show();
     }
 
-    //bắt sự kiện cho
+    //bắt sự kiện cho item menu
     public void onClickTTK(View view){
         switch (view.getId()){
                 //hổ trợ về mã tài khoản
