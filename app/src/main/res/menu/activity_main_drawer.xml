@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_DS_HS"
+            android:icon="@drawable/ic_hs_sv"
+            android:title="Danh Sách HS" />
+        <item
+            android:id="@+id/nav_TKB"
+            android:icon="@drawable/ic_tkb1"
+            android:title="Thời Khóa Biểu" />
+        <item
+            android:id="@+id/nav_HocTap"
+            android:icon="@drawable/ic_sach1"
+            android:title="Học Tập" />
+    </group>
+    <item android:title="Liên hệ GV">
+        <menu>
+            <item
+                android:id="@+id/nav_call"
+                android:icon="@drawable/ic_call1"
+                android:title="Gọi cho GV" />
+            <item
+                android:id="@+id/nav_sms"
+                android:icon="@drawable/ic_sms"
+                android:title="Tin nhắn cho GV" />
+        </menu>
+    </item>
+</menu>

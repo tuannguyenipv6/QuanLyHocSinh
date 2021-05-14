@@ -179,6 +179,9 @@ public class MainActivity extends AppCompatActivity {
                                 editor.putString("MK", user.getmMatKhau() + "");
                                 editor.commit();
 
+                                Intent intent = new Intent(MainActivity.this, MainActivity_Info_HocSinh.class);
+                                startActivity(intent);
+
                                 Toast.makeText(MainActivity.this, "Đăng nhập ok!", Toast.LENGTH_SHORT).show();
                             }
                         }else if (response.trim().equals("Tài khoản hoặc mã tài khoản không khớp")){
