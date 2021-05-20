@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -28,9 +29,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.qlhcsinh.Retrofit.DataClient;
+import com.example.qlhcsinh.Retrofit.UtilsAPI;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity {
     String urlDoiMK = "http://192.168.43.84/QLHS/DoiMatKhau.php";
@@ -71,9 +78,39 @@ public class MainActivity extends AppCompatActivity {
                 String TK = edtTK.getText().toString().trim();
                 String MK = edtMK.getText().toString().trim();
                 if (!TK.isEmpty() && !MK.isEmpty()){
-                    int iMK = Integer.parseInt(MK);
-                    User user = new User(TK, iMK);
-                    DMK_DN(user, 2, urlDN);
+                    int intMK = Integer.parseInt(MK);
+                    DataClient DataClient = UtilsAPI.getData();
+                    Call<User> callBack =DataClient.Login(TK, intMK);
+                    callBack.enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(Call<User> call, retrofit2.Response<User> response) {
+                            if (response != null){
+                                User user = response.body();
+                                if (user.getmTaiKhoan().equals("ERROR TKMK")){
+                                    Toast.makeText(MainActivity.this, "Sai thông tin", Toast.LENGTH_SHORT).show();
+                                }else if (user.getmTaiKhoan().equals("ERROR")){
+                                    Toast.makeText(MainActivity.this, "Lỗi", Toast.LENGTH_SHORT).show();
+                                }else {
+                                    //đăng nhập thành công lưu tk
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putString("TK", user.getmTaiKhoan());
+                                    editor.putString("MK", user.getmMatKhau() + "");
+                                    editor.commit();
+
+                                    //chuyển qua màn hình info
+                                    Intent intent = new Intent(MainActivity.this, MainActivity_Info_HocSinh.class);
+                                    intent.putExtra("Info_TKMK", user);
+                                    startActivity(intent);
+
+                                    Toast.makeText(MainActivity.this, "Đăng nhập ok!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<User> call, Throwable t) {
+                            Log.d("BBB-Check-ERROR", t.getMessage());
+                        }
+                    });
                 }
                 break;
         }
@@ -154,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                         int iMTK = Integer.parseInt(MTK);
                         int iMK = Integer.parseInt(MK1);
                         User user = new User(TK, iMK, iMTK);
-                        DMK_DN(user, 1, urlDoiMK);
+                        DMK_DN(user, urlDoiMK);
                     }else Toast.makeText(MainActivity.this, "Mật khẩu mới không khớp", Toast.LENGTH_SHORT).show();
                 }else Toast.makeText(MainActivity.this, "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show();
             }
@@ -162,32 +199,17 @@ public class MainActivity extends AppCompatActivity {
         pDialog.show();  //lệnh show dialog
     }
     //tham số int DMK_DN để xác định đổi mk hay đăng nhập
-    private void DMK_DN(User user, int DMK_DN, String url){
+    private void DMK_DN(User user, String url){
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         if (response.trim().equals("Thành Công")){
-                            if (DMK_DN == 1){
-                                pDialog.cancel();
-                                Toast.makeText(MainActivity.this, "Thành công!", Toast.LENGTH_SHORT).show();
-                            }else {
-                                //đăng nhập thành công lưu tk
-                                SharedPreferences.Editor editor = preferences.edit();
-                                editor.putString("TK", user.getmTaiKhoan());
-                                editor.putString("MK", user.getmMatKhau() + "");
-                                editor.commit();
-
-                                Intent intent = new Intent(MainActivity.this, MainActivity_Info_HocSinh.class);
-                                startActivity(intent);
-
-                                Toast.makeText(MainActivity.this, "Đăng nhập ok!", Toast.LENGTH_SHORT).show();
-                            }
-                        }else if (response.trim().equals("Tài khoản hoặc mã tài khoản không khớp")){
+                            pDialog.cancel();
+                            Toast.makeText(MainActivity.this, "Thành công!", Toast.LENGTH_SHORT).show();
+                        }else if (response.trim().equals("Sai thong tin")){
                             Toast.makeText(MainActivity.this, "Tài khoản hoặc mã tài khoản không khớp!", Toast.LENGTH_SHORT).show();
-                        }else if (response.trim().equals("Sai thông tin!")){
-                            Toast.makeText(MainActivity.this, "Sai thông tin!", Toast.LENGTH_SHORT).show();
                         }else Toast.makeText(MainActivity.this, "Thất Bại!", Toast.LENGTH_SHORT).show();
                     }
                 },
@@ -202,9 +224,7 @@ public class MainActivity extends AppCompatActivity {
                 Map<String, String> param = new HashMap<>();
                 param.put("pTaiKhoan", user.getmTaiKhoan());
                 param.put("pMatKhau1", user.getmMatKhau() + "");
-                if (DMK_DN == 1){
-                    param.put("pQMK", user.getmQ_MK() + "");
-                }
+                param.put("pQMK", user.getmQ_MK() + "");
                 return param;
             }
         };

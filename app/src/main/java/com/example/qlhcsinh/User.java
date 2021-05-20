@@ -1,10 +1,29 @@
 package com.example.qlhcsinh;
 
-public class User {
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
+
+public class User implements Serializable {
+    @SerializedName("TaiKhoan")
+    @Expose
     private String mTaiKhoan;
+
+    @SerializedName("MatKhau")
+    @Expose
     private int mMatKhau;
+
+    @SerializedName("MSL")
+    @Expose
     private int mMSL;
+
+    @SerializedName("GV_PH")
+    @Expose
     private boolean mGV_PH;
+
+    @SerializedName("QMK")
+    @Expose
     private int mQ_MK;
 
 

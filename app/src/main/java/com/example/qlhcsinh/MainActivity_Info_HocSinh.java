@@ -12,12 +12,17 @@ import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.qlhcsinh.Adapter.AdapterUser;
@@ -54,8 +59,11 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
 
     private static final int FRAGMENT_TKB = 2;
     private static final int FRAGMENT_HOCTAP = 3;
-
     private static int CURENT_FRAGMENT = 1;
+
+    //TODO
+    TextView txtName_GV, txtGmail_GV;
+    ImageView img_GV1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +77,10 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         initToolbarAnimations();
         onClickBtnAdd();
 
+        Intent intent = getIntent();
+        User user = (User) intent.getSerializableExtra("Info_TKMK");
+        txtName_GV.setText(user.getmTaiKhoan());
+        txtGmail_GV.setText(user.getmMatKhau() + "@gmail.com");
         //sự kiện click item menu Navigation
         mNavigationView.setNavigationItemSelectedListener(this);
     }
@@ -81,6 +93,12 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.mCollapsingToolbarLayout);
         mFloatingActionButton = (FloatingActionButton) findViewById(R.id.mFloatingActionButton);
         mRecyclerView = (RecyclerView) findViewById(R.id.rvUser);
+
+        //ánh xạ headerLayout của NavigationView
+        View headerLayout  = mNavigationView.getHeaderView(0);
+        txtGmail_GV = headerLayout .findViewById(R.id.txtGmail_GV);
+        txtName_GV = headerLayout .findViewById(R.id.txtName_GV);
+        img_GV1 = headerLayout .findViewById(R.id.img_GV1);
     }
 
     private void ActionToolBar(){
@@ -236,4 +254,13 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         //đóng menu
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return false;
-    }}
+    }
+
+    public void OnClick_Info(View view){
+        switch (view.getId()){
+            case R.id.Infor_GV:
+                Toast.makeText(this, "ok!", Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+}
