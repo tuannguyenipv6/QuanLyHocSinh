@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -12,32 +13,58 @@ import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.qlhcsinh.Adapter.AdapterUser;
 import com.example.qlhcsinh.Fragment.FragmentHocTap;
 import com.example.qlhcsinh.Fragment.FragmentTKB;
+import com.example.qlhcsinh.Object.InfoGV;
+import com.example.qlhcsinh.Object.User;
 import com.example.qlhcsinh.Object.User1;
+import com.example.qlhcsinh.Retrofit.DataClient;
+import com.example.qlhcsinh.Retrofit.UtilsAPI;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity_Info_HocSinh extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     DrawerLayout mDrawerLayout;
@@ -61,9 +88,20 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     private static final int FRAGMENT_HOCTAP = 3;
     private static int CURENT_FRAGMENT = 1;
 
-    //TODO
+    int REQUEST_CODE_IMAGE = 123;
+    String realPath = "";
+    String In = "";
+
     TextView txtName_GV, txtGmail_GV;
-    ImageView img_GV1;
+    ImageView img_GV1, SetImg, Img_GV2;
+    EditText edtValue;
+
+    User userLogin;
+    DataClient dataClient = UtilsAPI.getData();
+
+    Dialog dialogSetImg, dialogSetString;
+
+    int Check = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +114,17 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         initRecyclerView();
         initToolbarAnimations();
         onClickBtnAdd();
-
-        Intent intent = getIntent();
-        User user = (User) intent.getSerializableExtra("Info_TKMK");
-        txtName_GV.setText(user.getmTaiKhoan());
-        txtGmail_GV.setText(user.getmMatKhau() + "@gmail.com");
         //sự kiện click item menu Navigation
         mNavigationView.setNavigationItemSelectedListener(this);
+
+        Intent intent = getIntent();
+        userLogin = (User) intent.getSerializableExtra("Info_TKMK");
+
+        setInfoGV();
+
+
+
+
     }
     private void Anhxa(){
         mToolbar = findViewById(R.id.mToolbar);
@@ -93,12 +135,14 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.mCollapsingToolbarLayout);
         mFloatingActionButton = (FloatingActionButton) findViewById(R.id.mFloatingActionButton);
         mRecyclerView = (RecyclerView) findViewById(R.id.rvUser);
+        Img_GV2 = findViewById(R.id.Img_GV2);
 
         //ánh xạ headerLayout của NavigationView
         View headerLayout  = mNavigationView.getHeaderView(0);
         txtGmail_GV = headerLayout .findViewById(R.id.txtGmail_GV);
         txtName_GV = headerLayout .findViewById(R.id.txtName_GV);
         img_GV1 = headerLayout .findViewById(R.id.img_GV1);
+
     }
 
     private void ActionToolBar(){
@@ -259,8 +303,247 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     public void OnClick_Info(View view){
         switch (view.getId()){
             case R.id.Infor_GV:
-                Toast.makeText(this, "ok!", Toast.LENGTH_SHORT).show();
+                if (userLogin.ismGV_PH()){
+                    DialogDefault();
+                }
+                break;
+            case R.id.txtSetPhoto1:
+                DialogIMG();
+                In = "dPhoto1";
+                break;
+            case R.id.txtSetName:
+                DialogString();
+                In = "dName";
+                break;
+            case R.id.txtSetGmail:
+                In = "dMail";
+                DialogString();
+                break;
+            case R.id.txtSetPhoto2:
+                DialogIMG();
+                In = "dPhoto2";
+                break;
+            case R.id.txtSetSDT:
+                In = "dSDT";
+                DialogString();
+                break;
+
+                //sự kiện dialog IMG
+            case R.id.SetImg:
+                Check = 1;
+                ActivityCompat.requestPermissions(
+                        MainActivity_Info_HocSinh.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQUEST_CODE_IMAGE);
+                break;
+            case R.id.HuyImg:
+                dialogSetImg.cancel();
+                if (Check == 1){
+                    Check = 0;
+                }
+                break;
+            case R.id.OKImg:
+                if (Check == 1){
+                    UpPhoto();
+                    Check = 0;
+                }
+                break;
+
+                //dialog set String
+            case R.id.OKSetString:
+                String value = edtValue.getText().toString().trim();
+                if (value.length() > 0){
+                    UpChuoi(value, In);
+                    dialogSetString.cancel();
+                }
                 break;
         }
+    }
+
+
+
+    //Dialog set Default
+    private void DialogDefault(){
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_update_default);
+
+        Window window = dialog.getWindow();
+        if (window == null){
+            return;
+        }
+        //Bo tròn và set vị trí hiển thị dialog
+        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        WindowManager.LayoutParams windowLayoutParams = window.getAttributes();
+        windowLayoutParams.gravity = Gravity.CENTER; //hiển thị ở giữa
+        window.setAttributes(windowLayoutParams);
+        dialog.show();
+    }
+
+    private void DialogIMG(){
+        dialogSetImg = new Dialog(this);
+        dialogSetImg.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogSetImg.setContentView(R.layout.dialog_set_image);
+
+        //ánh xạ view
+        SetImg = dialogSetImg.findViewById(R.id.SetImg);
+
+        Window window = dialogSetImg.getWindow();
+        if (window == null){
+            return;
+        }
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialogSetImg.show();
+    }
+
+
+    //kết nối tới đường dẫn uri và duyệt xem bên trong có gì hay không nếu có thì get những giá trị đó ra
+    private String getRealPathFromURI(Uri uri){
+        String path = null;
+        String[] proj = {MediaStore.MediaColumns.DATA};
+        Cursor cursor = getContentResolver().query(uri, proj, null, null, null);
+        if (cursor.moveToFirst()){
+            int Column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            path = cursor.getString(Column_index);
+        }
+        cursor.close();
+        return path;
+    }
+
+    //xin quyền foder
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull @NotNull String[] permissions, @NonNull @NotNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_IMAGE && grantResults.length > 0 && grantResults[0] ==
+                PackageManager.PERMISSION_GRANTED){
+            //Intent.ACTION_PICK: chọn 1 cái gì đó
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            //chỉ chọn hình ảnh thôi
+            intent.setType("image/*");
+            startActivityForResult(intent, REQUEST_CODE_IMAGE);
+        }else Toast.makeText(this, "Chưa cấp quyền!", Toast.LENGTH_SHORT).show();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        if (requestCode == REQUEST_CODE_IMAGE && resultCode == RESULT_OK && data != null){
+            //uri: đường dẫn tới hình ảnh đó
+            Uri uri = data.getData();
+            //gán đường dẫn vào realPath
+            realPath = getRealPathFromURI(uri);
+            try {
+                //sau khi có đường dẫn thì dừng InputStream kết nối và mỡ đường dẫn đó ra
+                //bắt lôi try catch
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                //convert về dạng Bitmap với BitmapFactory
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                //set hình cho image
+                SetImg.setImageBitmap(bitmap);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    //up ảnh lên sever
+    private void UpPhoto(){
+        File file = new File(realPath);//lấy đường dẫn file
+        String file_path = file.getAbsolutePath(); //tên file
+
+        //chỉn sửa lại tên hình
+        String[] mangtenfile = file_path.split("\\.");
+        //sử dụng biến thời gian milis để gán vào tên
+        file_path = mangtenfile[0] + System.currentTimeMillis() + "." + mangtenfile[1];
+        Log.d("BBB-TênHình", file_path);
+
+        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        //uploaded_file: key gửi lên, 2 là đường dẫn, 3 là kiểu dữ liệu của file
+        MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", file_path, requestBody);
+
+        //Tạo kết nối và gửi giá trị về
+        Call<String> callBack = dataClient.UpPhoto(body);
+        callBack.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response != null){
+                    String Photo = response.body();
+                    UpChuoi(Photo, In);
+                }
+            }
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(MainActivity_Info_HocSinh.this, "Lỗi:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void UpChuoi(String Photo, String In){
+        if(In.equals("dPhoto1") || In.equals("dPhoto2")){
+            Photo = UtilsAPI.BaseUrl + "image/" + Photo;
+        }
+        Call<String> callBack = dataClient.UpValue(userLogin.getmMSL(), Photo, In);
+        callBack.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response != null){
+                    if (response.body().equals("Success")){
+                        Toast.makeText(MainActivity_Info_HocSinh.this, "Thành công!", Toast.LENGTH_SHORT).show();
+                        if (In.equals("dPhoto1") || In.equals("dPhoto2")){
+                            dialogSetImg.cancel();
+                        }
+                        setInfoGV();
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(MainActivity_Info_HocSinh.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    //dialog set String
+    private void DialogString(){
+        dialogSetString = new Dialog(this);
+        dialogSetString.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogSetString.setContentView(R.layout.dialog_set_string);
+
+        edtValue = dialogSetString.findViewById(R.id.edtValue);
+        Window window = dialogSetString.getWindow();
+        if (window == null){
+            return;
+        }
+        //Bo tròn và set vị trí hiển thị dialog
+        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        WindowManager.LayoutParams windowLayoutParams = window.getAttributes();
+        windowLayoutParams.gravity = Gravity.CENTER; //hiển thị ở giữa
+        window.setAttributes(windowLayoutParams);
+
+        dialogSetString.show();
+    }
+
+    //set Info GV
+    private void setInfoGV(){
+        Call<InfoGV> callBack = dataClient.GetInfoGV(userLogin.getmMSL());
+        callBack.enqueue(new Callback<InfoGV>() {
+            @Override
+            public void onResponse(Call<InfoGV> call, Response<InfoGV> response) {
+                if (response != null){
+                    InfoGV infoGV = response.body();
+                    txtName_GV.setText(infoGV.getmName());
+                    txtGmail_GV.setText(infoGV.getmGmail());
+                    Picasso.get().load(infoGV.getmPhoto1()).placeholder(R.drawable.ic_hoa).error(R.drawable.ic_hoa).into(img_GV1);
+                    Picasso.get().load(infoGV.getmPhoto2()).placeholder(R.drawable.ic_hoa).error(R.drawable.ic_hoa).into(Img_GV2);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<InfoGV> call, Throwable t) {
+                Toast.makeText(MainActivity_Info_HocSinh.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.d("BBB-Check-Error-Info", t.getMessage());
+            }
+        });
     }
 }

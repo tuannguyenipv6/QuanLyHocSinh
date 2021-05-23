@@ -29,10 +29,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.qlhcsinh.Object.User;
 import com.example.qlhcsinh.Retrofit.DataClient;
 import com.example.qlhcsinh.Retrofit.UtilsAPI;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +41,6 @@ import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity {
     String urlDoiMK = "http://192.168.43.84/QLHS/DoiMatKhau.php";
-    String urlDN = "http://192.168.43.84/QLHS/DangNhap.php";
     Dialog pDialog;
     EditText edtTK;
     EditText edtMK;
@@ -230,4 +229,6 @@ public class MainActivity extends AppCompatActivity {
         };
         requestQueue.add(stringRequest);
     }
+
+
 }

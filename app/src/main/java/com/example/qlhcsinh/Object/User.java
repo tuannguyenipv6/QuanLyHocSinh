@@ -1,4 +1,4 @@
-package com.example.qlhcsinh;
+package com.example.qlhcsinh.Object;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

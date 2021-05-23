@@ -19,15 +19,22 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.qlhcsinh.Object.User;
+import com.example.qlhcsinh.Retrofit.DataClient;
+import com.example.qlhcsinh.Retrofit.UtilsAPI;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class MainActivity_Tao_TK extends AppCompatActivity {
     boolean GVPH;
     TextView MaLop, titleTaoTK;
     EditText TKTTK, MKTTK, MLTTK, MTKTTK;
     String urlAddData = "http://192.168.43.84/QLHS/TaoTaiKhoan.php";
+    DataClient dataClient = UtilsAPI.getData();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +122,10 @@ public class MainActivity_Tao_TK extends AppCompatActivity {
                             MTKTTK.setText("");
                             MLTTK.setText("");
                             TKMK(user);
+                            //nếu tk phía GV đăng nhập thì insert giá trị mặt định vào trk
+                            if (user.ismGV_PH()){
+                                InsertDefault(user);
+                            }
                         }else if (response.trim().equals("Tài khoản đã tồn tại!")){
                             Toast.makeText(MainActivity_Tao_TK.this, "Tài khoản đã tồn tại!", Toast.LENGTH_SHORT).show();
                         }else if (response.trim().equals("Đã tồn tại MSL!")){
@@ -158,5 +169,19 @@ public class MainActivity_Tao_TK extends AppCompatActivity {
         builder.setCancelable(false);
         builder.show();
     }
+
+    //InsertDefault
+    private void InsertDefault(User user){
+        Call<String> callBack = dataClient.InsertDefault(user.getmMSL(), "matdinh", "Name GV", "MailGV@gmail.com", "matdinh", 1, "matdinh");
+        callBack.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, retrofit2.Response<String> response) {
+
+            }
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(MainActivity_Tao_TK.this, "Lỗi tạo TK chưa hoàn tất thông tin: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }
-//Tuấn Nguyễn!

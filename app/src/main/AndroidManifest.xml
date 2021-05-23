@@ -3,6 +3,7 @@
     package="com.example.qlhcsinh">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -12,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QLHọcSinh"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity_Info_HocSinh"></activity>
+        <activity android:name=".MainActivity_Info_HocSinh" />
         <activity android:name=".MainActivity_Tao_TK" />
         <activity android:name=".MainActivity">
             <intent-filter>
