@@ -38,4 +38,18 @@ public interface DataClient {
     @FormUrlEncoded
     @POST("GetInfoGV.php")
     Call<InfoGV> GetInfoGV(@Field("pMSL") int MSL);
+
+    //Up new HS
+    @FormUrlEncoded
+    @POST("UpNewHS.php")
+    Call<String> UpNewHS(@Field("pMSL") int MSL,
+                         @Field("pHoTen") String HoTen,
+                         @Field("pMSHS") int MSHS,
+                         @Field("pNamSinh") int NamSinh,
+                         @Field("pGioiTinh") int GioiTinh,
+                         @Field("pDanToc") String DanToc,
+                         @Field("pNoiSinh") String NoiSinh,
+                         @Field("pChucVu") String ChucVu,
+                         @Field("pSdtPh") String SdtPh,
+                         @Field("pLinkPhoto") String LinkPhoto);
 }

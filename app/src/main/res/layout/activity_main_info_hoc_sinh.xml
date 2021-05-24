@@ -37,6 +37,7 @@
                                 android:layout_height="match_parent"
                                 android:scaleType="centerCrop"
                                 android:id="@+id/Img_GV2"
+                                android:onClick="OnClick_Info"
                                 android:background="@drawable/mtuannguyen_3"/>
                         </RelativeLayout>
                         <View

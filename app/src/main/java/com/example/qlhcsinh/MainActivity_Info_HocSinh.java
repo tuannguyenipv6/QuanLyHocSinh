@@ -217,8 +217,12 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override//hàm bắt sự kiện Button add
             public void onClick(View v) {
-                //bắt sự kiện nút add khi chưa add vào menu của resoucre
-                Toast.makeText(MainActivity_Info_HocSinh.this, "add!", Toast.LENGTH_SHORT).show();
+                if (userLogin.ismGV_PH()){
+                    Intent intent = new Intent(MainActivity_Info_HocSinh.this, MainActivity_AddHs.class);
+                    intent.putExtra("Key_MSL", userLogin.getmMSL());
+                    startActivity(intent);
+                }else
+                    Toast.makeText(MainActivity_Info_HocSinh.this, "Phụ Huynh", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -328,9 +332,14 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                 DialogString();
                 break;
 
+            case R.id.Img_GV2:
+                if (userLogin.ismGV_PH()){
+                    DialogDefault();
+                }
+                break;
+
                 //sự kiện dialog IMG
             case R.id.SetImg:
-                Check = 1;
                 ActivityCompat.requestPermissions(
                         MainActivity_Info_HocSinh.this,
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -439,6 +448,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                 //set hình cho image
                 SetImg.setImageBitmap(bitmap);
+                Check = 1;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
