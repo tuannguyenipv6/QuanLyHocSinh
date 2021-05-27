@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -16,20 +17,27 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Retrofit.DataClient;
 import com.example.qlhcsinh.Retrofit.UtilsAPI;
+import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.security.Key;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Calendar;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -39,12 +47,18 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity_AddHs extends AppCompatActivity {
-    EditText Edt_NewNameHS, Edt_NewMSHS, Edt_NewNamSinh, Edt_NewDanToc, Edt_NewNoiSinh, Edt_NewChucVu, Edt_NewSDT;
+    EditText Edt_NewNameHS, Edt_NewMSHS, Edt_NewDanToc, Edt_NewNoiSinh, Edt_NewChucVu, Edt_NewSDT;
+    TextView Edt_NewNamSinh;
     ImageView Img_NewPhoto;
     int CheckImage = 1, REQUEST_CODE_IMAGE =123;
     String realPath = "";
     DataClient dataClient = UtilsAPI.getData();
     int MSL = 0;
+    int Key_Sua = 0;
+    int Check_ID = -1;
+    HocSinh Key_HocSinh = null;
+
+    RadioButton GT_Nam, GT_Nu;
 
     boolean GioiTinh = true;
     @Override
@@ -54,6 +68,12 @@ public class MainActivity_AddHs extends AppCompatActivity {
         Anhxa();
         Intent intent = getIntent();
         MSL = intent.getIntExtra("Key_MSL", 0);
+        Key_Sua = intent.getIntExtra("Key_Sua", 0);
+        //TODO Mới set học sinh vào layout
+        if (Key_Sua != 0){
+            Check_ID = intent.getIntExtra("Key_ID", 0);
+            SetInfoToLayout();
+        }
     }
     private void Anhxa(){
         Edt_NewNameHS = findViewById(R.id.Edt_NewNameHS);
@@ -64,11 +84,17 @@ public class MainActivity_AddHs extends AppCompatActivity {
         Edt_NewChucVu = findViewById(R.id.Edt_NewChucVu);
         Edt_NewSDT = findViewById(R.id.Edt_NewSDT);
         Img_NewPhoto = findViewById(R.id.Img_NewPhoto);
+        GT_Nam = findViewById(R.id.GT_Nam);
+        GT_Nu = findViewById(R.id.GT_Nu);
     }
     public void OnClickAddHS(View view){
         switch (view.getId()){
+            case R.id.Edt_NewNamSinh:
+                ChonNgay();
+                break;
             case R.id.Huy_New:
                 finish();
+                MainActivity_Info_HocSinh.mHocSinhs = MainActivity_Info_HocSinh.getDataHS();
                 break;
 
             case R.id.OK_New:
@@ -80,14 +106,18 @@ public class MainActivity_AddHs extends AppCompatActivity {
                 String ChucVu = Edt_NewChucVu.getText().toString().trim();
                 String SDT_PH = Edt_NewSDT.getText().toString().trim();
                 if (HoTen.length() > 0 && MSHS.length() > 0 && NamSinh.length() > 0 && DanToc.length() > 0 && NoiSinh.length() > 0 && ChucVu.length() > 0 && SDT_PH.length() > 0){
-                    int intMSHS = Integer.parseInt(MSHS), intNamSinh = Integer.parseInt(NamSinh);
-                    HocSinh hocSinh = new HocSinh(HoTen, intMSHS, intNamSinh, GioiTinh, DanToc, NoiSinh, ChucVu, SDT_PH);
+                    int intMSHS = Integer.parseInt(MSHS);
+                    HocSinh hocSinh = new HocSinh(HoTen, intMSHS, NamSinh, GioiTinh, DanToc, NoiSinh, ChucVu, SDT_PH);
                     if (CheckImage == 2){
                         UpPhoto(hocSinh);
                     }else {
-                        if (hocSinh.getmGioiTinh()){
-                            UpNewHS(hocSinh, "matdinhnam");
-                        }else UpNewHS(hocSinh, "matdinhnu");
+                        if (CheckImage == 10){
+                            UpNewHS(hocSinh, Key_HocSinh.getmLinkPhoto());
+                        }else {
+                            if (hocSinh.getmGioiTinh()){
+                                UpNewHS(hocSinh, "matdinhnam");
+                            }else UpNewHS(hocSinh, "matdinhnu");
+                        }
                     }
                 }
                 break;
@@ -191,19 +221,85 @@ public class MainActivity_AddHs extends AppCompatActivity {
         if (hocSinh.getmGioiTinh()){
             Check = 1;
         }
-        Call<String> callBack = dataClient.UpNewHS(MSL, hocSinh.getmHoTen(), hocSinh.getmMSHS(), hocSinh.getmNamSinh(),Check, hocSinh.getmDanToc(), hocSinh.getmNoiSinh(), hocSinh.getmChucVu(), hocSinh.getmSdtPh(), Photo);
+        Call<String> callBack = dataClient.UpNewHS(MSL, hocSinh.getmHoTen(), hocSinh.getmMSHS(), hocSinh.getmNamSinh(),Check, hocSinh.getmDanToc(), hocSinh.getmNoiSinh(), hocSinh.getmChucVu(), hocSinh.getmSdtPh(), Photo, Check_ID);
         callBack.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 if (response != null){
                     String s = response.body();
-                    Toast.makeText(MainActivity_AddHs.this, s, Toast.LENGTH_SHORT).show();
+                    if (s.equals("Success")){
+                        if (Check_ID < 0){
+                            Edt_NewNameHS.setText("");
+                            Edt_NewMSHS.setText("");
+                            Edt_NewNamSinh.setText("");
+                            Edt_NewDanToc.setText("");
+                            Edt_NewNoiSinh.setText("");
+                            Edt_NewChucVu.setText("");
+                            Edt_NewSDT.setText("");
+                        }else {
+                            finish();
+                            MainActivity_Info_HocSinh.mHocSinhs = MainActivity_Info_HocSinh.getDataHS();
+                        }
+                        Toast.makeText(MainActivity_AddHs.this, "Thành công!", Toast.LENGTH_SHORT).show();
+                    }else Toast.makeText(MainActivity_AddHs.this, "Thất bại!", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
                 Toast.makeText(MainActivity_AddHs.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void ChonNgay(){
+        Calendar calendar = Calendar.getInstance();
+        int Ngay = calendar.get(Calendar.DATE);
+        int Thang = calendar.get(Calendar.MONTH);
+        int Nam = calendar.get(Calendar.YEAR);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                calendar.set(year, month, dayOfMonth);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                Edt_NewNamSinh.setText(simpleDateFormat.format(calendar.getTime()));
+            }
+        }, Nam, Thang, Ngay);
+        datePickerDialog.show();
+    }
+
+    //TODO Lấy HS từ sever và set INFO Lên layout
+    private void SetInfoToLayout(){
+        Call<HocSinh> callBak = dataClient.GetDetailtHS(Check_ID);
+        callBak.enqueue(new Callback<HocSinh>() {
+            @Override
+            public void onResponse(Call<HocSinh> call, Response<HocSinh> response) {
+                if (response != null){
+                    Key_HocSinh = response.body();
+                    //TODO SET INFO
+                    CheckImage = 10;
+                    Check_ID = Key_HocSinh.getmID();
+                    Edt_NewNameHS.setText(Key_HocSinh.getmHoTen());
+                    Edt_NewMSHS.setText(Key_HocSinh.getmMSHS() + "");
+                    Edt_NewNamSinh.setText(Key_HocSinh.getmNamSinh());
+                    Edt_NewDanToc.setText(Key_HocSinh.getmDanToc());
+                    Edt_NewNoiSinh.setText(Key_HocSinh.getmNoiSinh());
+                    Edt_NewChucVu.setText(Key_HocSinh.getmChucVu());
+                    Edt_NewSDT.setText(Key_HocSinh.getmSdtPh());
+                    GioiTinh = Key_HocSinh.getmGioiTinh();
+                    if (Key_HocSinh.getmGioiTinh()){
+                        Picasso.get().load(Key_HocSinh.getmLinkPhoto()).error(R.drawable.nam).into(Img_NewPhoto);
+                        GT_Nam.setChecked(true);
+                    }else{
+                        Picasso.get().load(Key_HocSinh.getmLinkPhoto()).error(R.drawable.nu).into(Img_NewPhoto);
+                        GT_Nu.setChecked(true);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HocSinh> call, Throwable t) {
+                Toast.makeText(MainActivity_AddHs.this, "Lỗi " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

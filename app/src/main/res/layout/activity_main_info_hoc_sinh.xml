@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <androidx.drawerlayout.widget.DrawerLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -61,11 +60,11 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:layout_width="match_parent"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
                     android:layout_height="match_parent"
                     android:id="@+id/rvUser"
                     android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+                    android:paddingBottom="16dp"/>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:layout_width="wrap_content"
@@ -79,6 +78,11 @@
                     app:layout_anchorGravity="bottom|end|right"/>
 
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_centerInParent="true"
+                android:id="@+id/mProgressBar_Info"
+                android:layout_height="wrap_content"/>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:id="@+id/Conten_Fragment"
@@ -87,8 +91,6 @@
 
             </RelativeLayout>
         </RelativeLayout>
-
-
         <com.google.android.material.navigation.NavigationView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -97,7 +99,5 @@
             app:headerLayout="@layout/nav_header_main"
             app:menu="@menu/activity_main_drawer"
             android:id="@+id/mNavigationView"/>
-
     </androidx.drawerlayout.widget.DrawerLayout>
-
 </RelativeLayout>

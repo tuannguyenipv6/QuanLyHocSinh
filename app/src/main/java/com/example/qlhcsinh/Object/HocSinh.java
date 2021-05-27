@@ -3,7 +3,9 @@ package com.example.qlhcsinh.Object;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class HocSinh {
+import java.io.Serializable;
+
+public class HocSinh implements Serializable {
     @SerializedName("ID")
     @Expose
     private int mID;
@@ -30,7 +32,7 @@ public class HocSinh {
 
     @SerializedName("NamSinh")
     @Expose
-    private int mNamSinh;
+    private String mNamSinh;
 
     @SerializedName("GioiTinh")
     @Expose
@@ -64,8 +66,10 @@ public class HocSinh {
     @Expose
     private String mGhiChu;
 
+    public HocSinh() {
+    }
     //Contructo TODO Up HS (not Linkfb, LinkPhoto, GhiChu, ID)
-    public HocSinh(String mHoTen, int mMSHS, int mNamSinh, Boolean mGioiTinh, String mDanToc, String mNoiSinh, String mChucVu, String mSdtPh) {
+    public HocSinh(String mHoTen, int mMSHS, String mNamSinh, Boolean mGioiTinh, String mDanToc, String mNoiSinh, String mChucVu, String mSdtPh) {
         this.mHoTen = mHoTen;
         this.mMSHS = mMSHS;
         this.mNamSinh = mNamSinh;
@@ -108,11 +112,11 @@ public class HocSinh {
         this.mMSHS = mMSHS;
     }
 
-    public int getmNamSinh() {
+    public String getmNamSinh() {
         return mNamSinh;
     }
 
-    public void setmNamSinh(int mNamSinh) {
+    public void setmNamSinh(String mNamSinh) {
         this.mNamSinh = mNamSinh;
     }
 

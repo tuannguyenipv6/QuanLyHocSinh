@@ -2,6 +2,7 @@ package com.example.qlhcsinh;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -32,17 +34,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.qlhcsinh.Adapter.AdapterUser;
+import com.example.qlhcsinh.Adapter.AdapterHocSinh;
 import com.example.qlhcsinh.Fragment.FragmentHocTap;
 import com.example.qlhcsinh.Fragment.FragmentTKB;
+import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Object.InfoGV;
+import com.example.qlhcsinh.Object.OnClickItemHS;
 import com.example.qlhcsinh.Object.User;
-import com.example.qlhcsinh.Object.User1;
 import com.example.qlhcsinh.Retrofit.DataClient;
 import com.example.qlhcsinh.Retrofit.UtilsAPI;
 import com.google.android.material.appbar.AppBarLayout;
@@ -56,6 +61,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,10 +84,10 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     Toolbar mToolbar;
     //là nút add, FloatingActionButton: nút hành động nỗi
     FloatingActionButton mFloatingActionButton;
-    RecyclerView mRecyclerView;
-    AdapterUser adapter;
+    public static RecyclerView mRecyclerView;
+    public static AdapterHocSinh adapter;
     Menu mMenu;
-    List<User1> mUsers;
+    public static List<HocSinh> mHocSinhs;
     boolean isExpanded = true;//trạng thái của FloatingActionButton
 
     private static final int FRAGMENT_TKB = 2;
@@ -96,35 +102,58 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     ImageView img_GV1, SetImg, Img_GV2;
     EditText edtValue;
 
-    User userLogin;
-    DataClient dataClient = UtilsAPI.getData();
+    public static User userLogin;
+    public static DataClient dataClient = UtilsAPI.getData();
 
     Dialog dialogSetImg, dialogSetString;
 
     int Check = 0;
+
+    public static ProgressBar mProgressBar_Info;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_info_hoc_sinh);
         Anhxa();
+        MainActivity.mProgressBar.setVisibility(View.INVISIBLE);
+        Intent intent = getIntent();
+        userLogin = (User) intent.getSerializableExtra("Info_TKMK");
         ActionToolBar();
 
         initToolbar();
-        initRecyclerView();
         initToolbarAnimations();
         onClickBtnAdd();
         //sự kiện click item menu Navigation
         mNavigationView.setNavigationItemSelectedListener(this);
-
-        Intent intent = getIntent();
-        userLogin = (User) intent.getSerializableExtra("Info_TKMK");
-
         setInfoGV();
 
+        //TODO Set item HS cho RecyclerView
+        //set layout hiển thị cho RecyclerView (có 3 dạng layout hiển thị)
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);//dạng list
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mHocSinhs = getDataHS();
+        adapter = new AdapterHocSinh();
 
+        //TODO sự kiện onClick Item HS
+        adapter.setOnClickItemHS(new OnClickItemHS() {
+            @Override
+            public void onClick(HocSinh hocSinh) {
+                if (hocSinh.getmID() > 0){
+                    Intent intent1 = new Intent(MainActivity_Info_HocSinh.this, MainActivity_DetailtHocSinh.class);
+                    intent1.putExtra("Key_ID", hocSinh.getmID());
+                    startActivity(intent1);
+                }
+            }
 
-
+            @Override
+            public void onLongClick(HocSinh hocSinh) {
+                if (userLogin.ismGV_PH()){
+                    dialogXoaSua(hocSinh);
+                }
+            }
+        });
     }
     private void Anhxa(){
         mToolbar = findViewById(R.id.mToolbar);
@@ -142,9 +171,33 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         txtGmail_GV = headerLayout .findViewById(R.id.txtGmail_GV);
         txtName_GV = headerLayout .findViewById(R.id.txtName_GV);
         img_GV1 = headerLayout .findViewById(R.id.img_GV1);
-
+        mProgressBar_Info = findViewById(R.id.mProgressBar_Info);
     }
 
+    //TODO get Data HS
+    public static List<HocSinh> getDataHS(){
+        List<HocSinh> list = new ArrayList<>();
+        Call<List<HocSinh>> callBack = dataClient.GetHS(userLogin.getmMSL());
+        callBack.enqueue(new Callback<List<HocSinh>>() {
+            @Override
+            public void onResponse(Call<List<HocSinh>> call, Response<List<HocSinh>> response) {
+                if (response != null){
+                    for (HocSinh x:response.body()){
+                        list.add(x);
+                    }
+                    adapter.setmHocSinhs(mHocSinhs, mProgressBar_Info);
+                    mRecyclerView.setAdapter(adapter);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<HocSinh>> call, Throwable t) {
+
+            }
+        });
+        return list;
+    }
+
+    //TODO ActionToolBar
     private void ActionToolBar(){
         //gọi đến hàm hỗ trợ tool bar
         setSupportActionBar(mToolbar);
@@ -162,7 +215,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         });
     }
 
-    //hàm hiện nút add
+    //TODO Nút Toolbar
     private void initToolbar(){
         setSupportActionBar(mToolbar);
         if (getSupportActionBar() != null){
@@ -170,26 +223,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         }
     }
 
-    private void initRecyclerView(){
-        mRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        mUsers = getmUsers();
-        adapter = new AdapterUser(mUsers);
-        mRecyclerView.setAdapter(adapter);
-    }
-    private List<User1> getmUsers(){
-        List<User1> list = new ArrayList<>();
-        for (int i = 0 ; i <= 5 ; i ++){
-            User1 user = new User1(R.drawable.mtuannguyen, "Tuấn Nguyễn", "Tp. Hồ Chí Minh");
-            User1 user1 = new User1(R.drawable.mtuannguyen_3, "Quốc Tuấn", "Eahiao - Đắk Lắk");
-            User1 user2 = new User1(R.drawable.mtuannguyen_5, "Nguyễn Quốc Tuấn", "Gò Vấp - Sài Gòn");
-            User1 user3 = new User1(R.drawable.mtuannguyen_6, "Quốc Tuấn Nguyễn", "Q12. Tp. HCM");
-            list.add(user);     list.add(user1);    list.add(user2);    list.add(user3);
-        }
-        return list;
-    }
-
+    //TODO initToolbarAnimations
     private void initToolbarAnimations(){
         mCollapsingToolbarLayout.setTitle("Nguyễn Quốc Tuấn");
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mtuannguyen_3);
@@ -212,7 +246,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         });
     }
 
-    //sự kiện onclick nút add
+    //TODO sự kiện onclick nút add
     private void onClickBtnAdd(){
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override//hàm bắt sự kiện Button add
@@ -227,7 +261,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         });
     }
 
-    //Menu
+    //TODO Menu
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         //bắt sự kiện nút add (FloatingActionButton) khi đc gán vào menu
@@ -257,14 +291,14 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         return super.onPrepareOptionsMenu(mMenu);
     }
 
-    //set Fragment
+    //TODO set Fragment
     private void ReplaceFragment(Fragment fragment, String s){
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.Conten_Fragment, fragment, s);
         fragmentTransaction.commit();
     }
 
-    //sự kiện onclick menu Navigation
+    //TODO sự kiện onclick menu Navigation
     @Override
     public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
         switch (item.getItemId()){
@@ -304,6 +338,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         return false;
     }
 
+    //TODO BẮT SỰ KIỆN ONCLICK_INFO
     public void OnClick_Info(View view){
         switch (view.getId()){
             case R.id.Infor_GV:
@@ -371,7 +406,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
 
 
 
-    //Dialog set Default
+    //TODO Dialog set Default
     private void DialogDefault(){
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -420,7 +455,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         return path;
     }
 
-    //xin quyền foder
+    //TODO xin quyền foder
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull @NotNull String[] permissions, @NonNull @NotNull int[] grantResults) {
         if (requestCode == REQUEST_CODE_IMAGE && grantResults.length > 0 && grantResults[0] ==
@@ -456,7 +491,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    //up ảnh lên sever
+    //TODO up ảnh lên sever
     private void UpPhoto(){
         File file = new File(realPath);//lấy đường dẫn file
         String file_path = file.getAbsolutePath(); //tên file
@@ -513,7 +548,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         });
     }
 
-    //dialog set String
+    //TODO dialog set String
     private void DialogString(){
         dialogSetString = new Dialog(this);
         dialogSetString.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -555,5 +590,28 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                 Log.d("BBB-Check-Error-Info", t.getMessage());
             }
         });
+    }
+
+    //TODO Dialog xóa hay sửa học sinh
+    private void dialogXoaSua(HocSinh hocSinh){
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Thông báo");
+        dialog.setMessage("Bạn muốn thực hiện: ");
+
+        dialog.setPositiveButton("Sửa", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(MainActivity_Info_HocSinh.this, MainActivity_AddHs.class);
+                intent.putExtra("Key_Sua", 1);
+                intent.putExtra("Key_ID", hocSinh.getmID());
+                startActivity(intent);
+            }
+        });
+        dialog.setNegativeButton("Xóa", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        dialog.show();
     }
 }

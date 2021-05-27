@@ -18,6 +18,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:textColor="#056BBC"
+                android:id="@+id/txTitle"
                 android:layout_height="wrap_content"
                 android:text="Nhập nội dung: "></TextView>
             <EditText

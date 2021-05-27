@@ -12,7 +12,6 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/mtuannguyen"
             android:id="@+id/itHinh"/>
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,7 +31,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/itNoiO"
+                android:id="@+id/itChucVu"
                 android:textSize="18sp"
                 android:text="Gò Vấp - HCM"
                 android:padding="5dp"

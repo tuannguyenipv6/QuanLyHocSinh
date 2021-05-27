@@ -1,7 +1,10 @@
 package com.example.qlhcsinh.Retrofit;
 
+import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Object.InfoGV;
 import com.example.qlhcsinh.Object.User;
+
+import java.util.List;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -39,17 +42,33 @@ public interface DataClient {
     @POST("GetInfoGV.php")
     Call<InfoGV> GetInfoGV(@Field("pMSL") int MSL);
 
+    //Get HS
+    @FormUrlEncoded
+    @POST("GetHS.php")
+    Call<List<HocSinh>> GetHS(@Field("pMSL") int MSL);
+
     //Up new HS
     @FormUrlEncoded
     @POST("UpNewHS.php")
     Call<String> UpNewHS(@Field("pMSL") int MSL,
                          @Field("pHoTen") String HoTen,
                          @Field("pMSHS") int MSHS,
-                         @Field("pNamSinh") int NamSinh,
+                         @Field("pNamSinh") String NamSinh,
                          @Field("pGioiTinh") int GioiTinh,
                          @Field("pDanToc") String DanToc,
                          @Field("pNoiSinh") String NoiSinh,
                          @Field("pChucVu") String ChucVu,
                          @Field("pSdtPh") String SdtPh,
-                         @Field("pLinkPhoto") String LinkPhoto);
+                         @Field("pLinkPhoto") String LinkPhoto,
+                         @Field("pCheckID") int ID);
+
+    //Get Detailt HS
+    @FormUrlEncoded
+    @POST("GetDetailtHS.php")
+    Call<HocSinh> GetDetailtHS(@Field("pID") int ID);
+
+    //Up Link FB
+    @FormUrlEncoded
+    @POST("UpLinkFB.php")
+    Call<String> UpLinkFB(@Field("pID") int ID, @Field("pValue") String LinkFB, @Field("pCheck") int Check);
 }

@@ -19,6 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,11 +46,13 @@ public class MainActivity extends AppCompatActivity {
     EditText edtTK;
     EditText edtMK;
     SharedPreferences preferences;
+    public static ProgressBar mProgressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);edtTK = findViewById(R.id.edt_TK_Main);
         edtMK = findViewById(R.id.edt_MK_Main);
+        mProgressBar = findViewById(R.id.mProgressBar);
 
         //lưu tài khoản mật khẩu
         preferences = getSharedPreferences("DataLogin", MODE_PRIVATE);
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 String TK = edtTK.getText().toString().trim();
                 String MK = edtMK.getText().toString().trim();
                 if (!TK.isEmpty() && !MK.isEmpty()){
+                    mProgressBar.setVisibility(View.VISIBLE);
                     int intMK = Integer.parseInt(MK);
                     DataClient DataClient = UtilsAPI.getData();
                     Call<User> callBack =DataClient.Login(TK, intMK);
@@ -86,8 +90,10 @@ public class MainActivity extends AppCompatActivity {
                             if (response != null){
                                 User user = response.body();
                                 if (user.getmTaiKhoan().equals("ERROR TKMK")){
+                                    mProgressBar.setVisibility(View.INVISIBLE);
                                     Toast.makeText(MainActivity.this, "Sai thông tin", Toast.LENGTH_SHORT).show();
                                 }else if (user.getmTaiKhoan().equals("ERROR")){
+                                    mProgressBar.setVisibility(View.INVISIBLE);
                                     Toast.makeText(MainActivity.this, "Lỗi", Toast.LENGTH_SHORT).show();
                                 }else {
                                     //đăng nhập thành công lưu tk
@@ -95,13 +101,10 @@ public class MainActivity extends AppCompatActivity {
                                     editor.putString("TK", user.getmTaiKhoan());
                                     editor.putString("MK", user.getmMatKhau() + "");
                                     editor.commit();
-
                                     //chuyển qua màn hình info
                                     Intent intent = new Intent(MainActivity.this, MainActivity_Info_HocSinh.class);
                                     intent.putExtra("Info_TKMK", user);
                                     startActivity(intent);
-
-                                    Toast.makeText(MainActivity.this, "Đăng nhập ok!", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }
