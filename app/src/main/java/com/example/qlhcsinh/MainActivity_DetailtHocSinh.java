@@ -104,7 +104,7 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
     }
 
     private void GetDetailtHS(int ID){
-        Call<HocSinh> callBack = dataClient.GetDetailtHS(ID);
+        Call<HocSinh> callBack = dataClient.GetDetailtHS(ID, 2);
         callBack.enqueue(new Callback<HocSinh>() {
             @Override
             public void onResponse(Call<HocSinh> call, Response<HocSinh> response) {

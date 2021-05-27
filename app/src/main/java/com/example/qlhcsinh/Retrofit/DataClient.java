@@ -65,7 +65,7 @@ public interface DataClient {
     //Get Detailt HS
     @FormUrlEncoded
     @POST("GetDetailtHS.php")
-    Call<HocSinh> GetDetailtHS(@Field("pID") int ID);
+    Call<HocSinh> GetDetailtHS(@Field("pID") int ID, @Field("pCheck") int Check);
 
     //Up Link FB
     @FormUrlEncoded

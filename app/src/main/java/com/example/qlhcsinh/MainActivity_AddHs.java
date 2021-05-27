@@ -270,7 +270,7 @@ public class MainActivity_AddHs extends AppCompatActivity {
 
     //TODO Lấy HS từ sever và set INFO Lên layout
     private void SetInfoToLayout(){
-        Call<HocSinh> callBak = dataClient.GetDetailtHS(Check_ID);
+        Call<HocSinh> callBak = dataClient.GetDetailtHS(Check_ID, 2);
         callBak.enqueue(new Callback<HocSinh>() {
             @Override
             public void onResponse(Call<HocSinh> call, Response<HocSinh> response) {

@@ -610,8 +610,32 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         dialog.setNegativeButton("Xóa", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                XoaHS(hocSinh.getmID());
             }
         });
         dialog.show();
+    }
+
+    //TODO Xóa HS
+    private void XoaHS(int ID){
+        Call<HocSinh> callBack = dataClient.GetDetailtHS(ID, 1);
+        callBack.enqueue(new Callback<HocSinh>() {
+            @Override
+            public void onResponse(Call<HocSinh> call, Response<HocSinh> response) {
+                if(response != null){
+                    HocSinh hocSinh = response.body();
+                    if (hocSinh.getmHoTen().equals("Success")){
+                        Toast.makeText(MainActivity_Info_HocSinh.this, "Đã xóa", Toast.LENGTH_SHORT).show();
+                        mHocSinhs = getDataHS();
+                    }else
+                        Toast.makeText(MainActivity_Info_HocSinh.this, "Thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HocSinh> call, Throwable t) {
+                Toast.makeText(MainActivity_Info_HocSinh.this, "Lỗi " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
