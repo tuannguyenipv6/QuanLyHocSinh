@@ -2,7 +2,10 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:background="#2196F3"
+    android:background="@drawable/background_nen"
     android:layout_height="match_parent">
-
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:id="@+id/Recly_TKB"
+        android:layout_height="match_parent"/>
 </RelativeLayout>

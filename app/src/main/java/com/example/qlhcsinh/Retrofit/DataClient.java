@@ -2,6 +2,7 @@ package com.example.qlhcsinh.Retrofit;
 
 import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Object.InfoGV;
+import com.example.qlhcsinh.Object.TKB;
 import com.example.qlhcsinh.Object.User;
 
 import java.util.List;
@@ -71,4 +72,26 @@ public interface DataClient {
     @FormUrlEncoded
     @POST("UpLinkFB.php")
     Call<String> UpLinkFB(@Field("pID") int ID, @Field("pValue") String LinkFB, @Field("pCheck") int Check);
+
+    //Up/Sua TKB
+    @FormUrlEncoded
+    @POST("TKB.php")
+    Call<String> UpSetTKB(@Field("pMSL") int MSL,
+                         @Field("pThu") int Thu,
+                         @Field("pSang1") String Sang1,
+                         @Field("pSang2") String Sang2,
+                         @Field("pSang3") String Sang3,
+                         @Field("pSang4") String Sang4,
+                         @Field("pSang5") String Sang5,
+                          @Field("pChieu1") String Chieu1,
+                          @Field("pChieu2") String Chieu2,
+                          @Field("pChieu3") String Chieu3,
+                          @Field("pChieu4") String Chieu4,
+                          @Field("pChieu5") String Chieu5,
+                          @Field("pUpSet") int UpSet);
+
+    //Get TKB
+    @FormUrlEncoded
+    @POST("GetTKB.php")
+    Call<List<TKB>> GetTKB(@Field("pMSL") int MSL);
 }

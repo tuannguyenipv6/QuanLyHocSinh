@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 public class HocSinh implements Serializable {
     @SerializedName("ID")
@@ -175,4 +176,12 @@ public class HocSinh implements Serializable {
     public void setmGhiChu(String mGhiChu) {
         this.mGhiChu = mGhiChu;
     }
+
+    //TODO Sắp xếp
+    public static Comparator<HocSinh> AZ_HocSinh = new Comparator<HocSinh>() {
+        @Override
+        public int compare(HocSinh o1, HocSinh o2) {
+            return o1.getmHoTen().compareTo(o2.getmHoTen());
+        }
+    };
 }

@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.qlhcsinh.Object.HocSinh;
+import com.example.qlhcsinh.Object.User;
 import com.example.qlhcsinh.Retrofit.DataClient;
 import com.example.qlhcsinh.Retrofit.UtilsAPI;
 import com.squareup.picasso.Picasso;
@@ -43,6 +44,7 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
     HocSinh mHocSinh = null;
     int REQUEST_CODE_CALL = 26;
     int REQUEST_CODE_SMS = 27;
+    User userLogin = MainActivity_Info_HocSinh.userLogin;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +59,9 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
         Detl_FB.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                DiaLinkFB(mHocSinh);
+                if (userLogin.ismGV_PH()){
+                    DiaLinkFB(mHocSinh);
+                }
                 return false;
             }
         });
@@ -73,7 +77,9 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
         switch (view.getId()){
             case R.id.Detl_FB:
                 if (mHocSinh.getmLink().equals("chuaco")){
-                    DiaLinkFB(mHocSinh);
+                    if (userLogin.ismGV_PH()){
+                        DiaLinkFB(mHocSinh);
+                    }else Toast.makeText(this, "GV Chưa thiếc lập!", Toast.LENGTH_SHORT).show();
                 }else {
                     try {
                         Intent intent1 =new Intent();
@@ -81,8 +87,10 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
                         intent1.setData(Uri.parse(mHocSinh.getmLink()));
                         startActivity(intent1);
                     }catch (Exception e){
-                        Toast.makeText(MainActivity_DetailtHocSinh.this, "Link fb không hợp lệ!\nThiếc lập lại.", Toast.LENGTH_SHORT).show();
-                        DiaLinkFB(mHocSinh);
+                        if (userLogin.ismGV_PH()){
+                            Toast.makeText(MainActivity_DetailtHocSinh.this, "Link fb không hợp lệ!\nThiếc lập lại.", Toast.LENGTH_SHORT).show();
+                            DiaLinkFB(mHocSinh);
+                        }else Toast.makeText(this, "GV thiếc lập sai Link fb!\nKhông thể tải!", Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;
@@ -97,7 +105,9 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
             case R.id.Detl_Luu:
                 String GhiChu = Detl_GhiChu.getText().toString().trim();
                 if (GhiChu.length() > 0){
-                    UpGhiChu(mHocSinh.getmID(), GhiChu);
+                    if (userLogin.ismGV_PH()){
+                        UpGhiChu(mHocSinh.getmID(), GhiChu);
+                    }else Toast.makeText(this, "P/H không thể thiếc lập!", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }

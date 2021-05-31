@@ -15,7 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QLHọcSinh"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity_DetailtHocSinh"></activity>
+        <activity android:name=".MainActivity_setTKB"></activity>
+        <activity android:name=".MainActivity_DetailtHocSinh" />
         <activity android:name=".MainActivity_AddHs" />
         <activity android:name=".MainActivity_Info_HocSinh" />
         <activity android:name=".MainActivity_Tao_TK" />

@@ -47,6 +47,7 @@ import com.example.qlhcsinh.Fragment.FragmentTKB;
 import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Object.InfoGV;
 import com.example.qlhcsinh.Object.OnClickItemHS;
+import com.example.qlhcsinh.Object.TKB;
 import com.example.qlhcsinh.Object.User;
 import com.example.qlhcsinh.Retrofit.DataClient;
 import com.example.qlhcsinh.Retrofit.UtilsAPI;
@@ -63,6 +64,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import okhttp3.MediaType;
@@ -185,6 +187,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                     for (HocSinh x:response.body()){
                         list.add(x);
                     }
+                    Collections.sort(mHocSinhs, HocSinh.AZ_HocSinh);
                     adapter.setmHocSinhs(mHocSinhs, mProgressBar_Info);
                     mRecyclerView.setAdapter(adapter);
                 }
