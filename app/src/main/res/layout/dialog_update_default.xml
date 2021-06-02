@@ -85,6 +85,23 @@
             android:textSize="18sp"
             android:textColor="@color/black"
             android:onClick="OnClick_Info"
+            android:id="@+id/txtSetTenLop"
+            android:gravity="center"
+            android:background="@drawable/background_dialog_default"
+            android:padding="10dp"
+            android:text="Đặt tên lớp"></TextView>
+    </androidx.cardview.widget.CardView>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        app:cardCornerRadius="8dp"
+        android:layout_margin="1dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:onClick="OnClick_Info"
             android:id="@+id/txtSetSDT"
             android:gravity="center"
             android:background="@drawable/background_dialog_default"

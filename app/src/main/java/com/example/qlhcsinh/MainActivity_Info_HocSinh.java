@@ -19,6 +19,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -96,7 +97,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     private static final int FRAGMENT_HOCTAP = 3;
     private static int CURENT_FRAGMENT = 1;
 
-    int REQUEST_CODE_IMAGE = 123;
+    int REQUEST_CODE_IMAGE = 123, REQUEST_CODE_CALL = 12, REQUEST_CODE_SMS = 21;
     String realPath = "";
     String In = "";
 
@@ -113,6 +114,12 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
 
     public static ProgressBar mProgressBar_Info;
 
+    public static String Key_Lop = "";
+    String SDT_GV = "", Name_GV = "";
+
+    long backPressTinme;
+    Toast mToast;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,9 +133,13 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         initToolbar();
         initToolbarAnimations();
         onClickBtnAdd();
+//        mFloatingActionButton.setImageResource(R.drawable.ic_info);
         //sự kiện click item menu Navigation
         mNavigationView.setNavigationItemSelectedListener(this);
+
+        //TODO Set Info GV lên layout
         setInfoGV();
+
 
         //TODO Set item HS cho RecyclerView
         //set layout hiển thị cho RecyclerView (có 3 dạng layout hiển thị)
@@ -228,12 +239,14 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
 
     //TODO initToolbarAnimations
     private void initToolbarAnimations(){
-        mCollapsingToolbarLayout.setTitle("Nguyễn Quốc Tuấn");
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mtuannguyen_3);
+        mCollapsingToolbarLayout.setTitle("Lớp: ");
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.img_bia_hs);
         Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
             @Override
             public void onGenerated(@Nullable Palette palette) {
-                int myColor = palette.getVibrantColor(getResources().getColor(R.color.color_toolbar));
+//                int myColor = palette.getVibrantColor(getResources().getColor(R.color.purple_700));
+                Resources res = getResources();
+                int myColor = res.getColor(R.color.color_toolbar);
                 mCollapsingToolbarLayout.setContentScrimColor(myColor);
                 mCollapsingToolbarLayout.setStatusBarScrimColor(getResources().getColor(R.color.black_trans));
             }
@@ -330,10 +343,13 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                 }
                 break;
             case R.id.nav_call:
-                Toast.makeText(MainActivity_Info_HocSinh.this, "call", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(MainActivity_Info_HocSinh.this, new String[]{Manifest.permission.CALL_PHONE,}, REQUEST_CODE_CALL);
                 break;
             case R.id.nav_sms:
-                Toast.makeText(MainActivity_Info_HocSinh.this, "sms", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(MainActivity_Info_HocSinh.this, new String[]{Manifest.permission.SEND_SMS,}, REQUEST_CODE_SMS);
+                break;
+            case R.id.nav_DangXuat:
+                finish();
                 break;
         }
         //đóng menu
@@ -367,6 +383,10 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                 break;
             case R.id.txtSetSDT:
                 In = "dSDT";
+                DialogString();
+                break;
+            case R.id.txtSetTenLop:
+                In = "dTenLop";
                 DialogString();
                 break;
 
@@ -468,7 +488,27 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
             //chỉ chọn hình ảnh thôi
             intent.setType("image/*");
             startActivityForResult(intent, REQUEST_CODE_IMAGE);
-        }else Toast.makeText(this, "Chưa cấp quyền!", Toast.LENGTH_SHORT).show();
+        }else if (REQUEST_CODE_CALL == requestCode && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            if (SDT_GV.equals("matdinh")){
+                Toast.makeText(this, "GV Chưa thiếc lập SDT!", Toast.LENGTH_SHORT).show();
+            }else {
+                Intent intent1 =new Intent();
+                intent1.setAction(Intent.ACTION_CALL);
+                intent1.setData(Uri.parse("tel:" + SDT_GV));
+                startActivity(intent1);
+            }
+        }else if (REQUEST_CODE_SMS == requestCode && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            if (SDT_GV.equals("matdinh")){
+                Toast.makeText(this, "GV Chưa thiếc lập SDT!", Toast.LENGTH_SHORT).show();
+            }else {
+                Intent intent1 =new Intent();
+                intent1.setAction(Intent.ACTION_SENDTO);
+                intent1.putExtra("sms_body", "Giáo Viên: " + Name_GV + "\n");
+                intent1.setData(Uri.parse("sms:" + SDT_GV));
+                startActivity(intent1);
+            }
+        }else Toast.makeText(MainActivity_Info_HocSinh.this, "Bạn chưa cấp quyền!", Toast.LENGTH_SHORT).show();
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
     @Override
@@ -583,14 +623,17 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                     txtName_GV.setText(infoGV.getmName());
                     txtGmail_GV.setText(infoGV.getmGmail());
                     Picasso.get().load(infoGV.getmPhoto1()).placeholder(R.drawable.ic_hoa).error(R.drawable.ic_hoa).into(img_GV1);
-                    Picasso.get().load(infoGV.getmPhoto2()).placeholder(R.drawable.ic_hoa).error(R.drawable.ic_hoa).into(Img_GV2);
+                    Picasso.get().load(infoGV.getmPhoto2()).placeholder(R.drawable.ic_hoa).error(R.drawable.img_bia_hs).into(Img_GV2);
+                    mCollapsingToolbarLayout.setTitle("Lớp: " + infoGV.getmTenLop());
+                    Key_Lop = infoGV.getmTenLop();
+                    SDT_GV = infoGV.getmSDT();
+                    Name_GV = infoGV.getmName();
                 }
             }
 
             @Override
             public void onFailure(Call<InfoGV> call, Throwable t) {
                 Toast.makeText(MainActivity_Info_HocSinh.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.d("BBB-Check-Error-Info", t.getMessage());
             }
         });
     }
@@ -640,5 +683,35 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                 Toast.makeText(MainActivity_Info_HocSinh.this, "Lỗi " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    //TODO Nút onBackPress
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawerLayout = findViewById(R.id.mDrawerLayout);
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)){
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else {
+            //trong thời gian 2s nhấn back sẽ thoát application
+            if (backPressTinme + 2000 > System.currentTimeMillis()){
+                //Khoi tao lai Activity main
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                // Tao su kien ket thuc app
+                Intent startMain = new Intent(Intent.ACTION_MAIN);
+                startMain.addCategory(Intent.CATEGORY_HOME);
+                startActivity(startMain);
+                finish();//thoát application
+                mToast.cancel();//tắt hiển thị luôn tk Toast
+                return;
+            }else {
+                mToast = Toast.makeText(this, "Nhấn Back 1 lần nữa để Thoát!", Toast.LENGTH_SHORT);
+                mToast.show();
+            }
+            backPressTinme = System.currentTimeMillis();
+
+
+
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.qlhcsinh.Retrofit;
 
+import com.example.qlhcsinh.Object.DiemHS;
 import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Object.InfoGV;
 import com.example.qlhcsinh.Object.TKB;
@@ -25,7 +26,7 @@ public interface DataClient {
     //phương thức InsertDefault
     @FormUrlEncoded
     @POST("InsertDefault.php")
-    Call<String> InsertDefault(@Field("pMSL") int MSL, @Field("pPhoto1") String Photo1, @Field("pName") String Name, @Field("pMail") String Mail, @Field("pPhoto2") String Photo2, @Field("Info") int Info, @Field("pSDT") String SDT);
+    Call<String> InsertDefault(@Field("pMSL") int MSL, @Field("pPhoto1") String Photo1, @Field("pName") String Name, @Field("pMail") String Mail, @Field("pPhoto2") String Photo2, @Field("Info") int Info, @Field("pSDT") String SDT, @Field("pLop") String Lop);
 
     //phương thức up ảnh lên sever
     //tạo phương thức gửi ảnh với @Multipart: có thể up file lên sever
@@ -94,4 +95,24 @@ public interface DataClient {
     @FormUrlEncoded
     @POST("GetTKB.php")
     Call<List<TKB>> GetTKB(@Field("pMSL") int MSL);
+
+    //Ktra Bảng Điểm
+    @FormUrlEncoded
+    @POST("KtraKey_ID.php")
+    Call<String> KtraKey_ID(@Field("pKey_ID") int Key_ID);
+
+    //Tạo Bảng Điểm
+    @FormUrlEncoded
+    @POST("TaoBangDiem.php")
+    Call<String> TaoBangDiem(@Field("pKey_ID") int Key_ID);
+
+    //Lấy Bảng điểm ra cho HS
+    @FormUrlEncoded
+    @POST("GetBangDiem.php")
+    Call<List<DiemHS>> GetBangDiem(@Field("pKey_ID") int Key_ID);
+
+    //Set diem theo Key_ID
+    @FormUrlEncoded
+    @POST("SetDiem.php")
+    Call<String> SetDiem(@Field("pKey_ID") int Key_ID, @Field("pD_Mieng") double D_Mieng, @Field("pD_15p") double D_15p, @Field("pD_1Tiet") double D_1Tiet, @Field("pD_HocKy") double D_HocKy);
 }

@@ -67,6 +67,7 @@ public class MainActivity_setTKB extends AppCompatActivity {
 
     //TODO Gán TKB củ vào layout
     private void GetTKBCu(TKB tkb){
+        SetTKB_Thu.setText("Thứ " + tkb.getmThu());
         Set_TKB_S1.setText(tkb.getmSang1());
         Set_TKB_S2.setText(tkb.getmSang2());
         Set_TKB_S3.setText(tkb.getmSang3());

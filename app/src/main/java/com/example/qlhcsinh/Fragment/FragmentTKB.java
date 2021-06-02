@@ -49,6 +49,7 @@ public class FragmentTKB extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());//dạng list
         Recly_TKB.setLayoutManager(layoutManager);
         Recly_TKB.setHasFixedSize(true);
+        Recly_TKB.setItemViewCacheSize(7);
         //TODO lấy tkb từ sever vsf set vào RecyclerView
         GetTKB();
 

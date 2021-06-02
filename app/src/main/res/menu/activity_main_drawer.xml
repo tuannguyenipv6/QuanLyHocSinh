@@ -29,4 +29,11 @@
                 android:title="Tin nhắn cho GV" />
         </menu>
     </item>
+    <item android:title="Đăng xuất">
+        <menu>
+            <item android:id="@+id/nav_DangXuat"
+                android:icon="@drawable/ic_dangxuat"
+                android:title="Đăng Xuất"/>
+        </menu>
+    </item>
 </menu>

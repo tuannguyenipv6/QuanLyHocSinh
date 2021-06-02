@@ -28,6 +28,18 @@ public class InfoGV {
     @Expose
     private String mSDT;
 
+    @SerializedName("TenLop")
+    @Expose
+    private String mTenLop;
+
+    public String getmTenLop() {
+        return mTenLop;
+    }
+
+    public void setmTenLop(String mTenLop) {
+        this.mTenLop = mTenLop;
+    }
+
     public int getmMSL() {
         return mMSL;
     }

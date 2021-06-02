@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -95,6 +97,8 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
                 }
                 break;
             case R.id.Detl_TraCuu:
+                //TODO KIỂM TRA Bảng điểm hs
+                KtraBanDiem();
                 break;
             case R.id.Detl_Call:
                 ActivityCompat.requestPermissions(MainActivity_DetailtHocSinh.this, new String[]{Manifest.permission.CALL_PHONE,}, REQUEST_CODE_CALL);
@@ -236,6 +240,75 @@ public class MainActivity_DetailtHocSinh extends AppCompatActivity {
                         Detl_GhiChu.setText(Value);
                         mHocSinh.setmGhiChu(Value);
                         Toast.makeText(MainActivity_DetailtHocSinh.this, "Đã lưu!", Toast.LENGTH_SHORT).show();
+                    }else
+                        Toast.makeText(MainActivity_DetailtHocSinh.this, "Thất bại", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(MainActivity_DetailtHocSinh.this, "Lỗi " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    //TODO Ktra bản điểm hs có chưa
+    private void KtraBanDiem(){
+        Call<String> callBack = dataClient.KtraKey_ID(mHocSinh.getmID());
+        callBack.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response != null){
+                    if (response.body().equals("Success")){
+                        Intent intent = new Intent(MainActivity_DetailtHocSinh.this, MainActivity_DiemHocTap.class);
+                        intent.putExtra("Key_ID", mHocSinh.getmID());
+                        intent.putExtra("Key_Ten", mHocSinh.getmHoTen());
+                        intent.putExtra("Key_MSHS", mHocSinh.getmMSHS());
+                        intent.putExtra("Key_ChucVu", mHocSinh.getmChucVu());
+
+                        startActivity(intent);
+                    }else if (response.body().equals("NotBanDiem")){
+                        DialogTaoBanDiem();
+                    }else
+                        Toast.makeText(MainActivity_DetailtHocSinh.this, "Lỗi " + response.body(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(MainActivity_DetailtHocSinh.this, "Lỗi " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    //TODO Dialog hỏi Tạo bản điểm khi chưa có
+    private void DialogTaoBanDiem(){
+        AlertDialog.Builder Dialog = new AlertDialog.Builder(this);
+        Dialog.setTitle("Thông báo!");
+        Dialog.setMessage("Bản điểm của HS " + mHocSinh.getmHoTen() + " chưa có\nXác nhận tạo!");
+        Dialog.setPositiveButton("Có", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                TaoBanDiem();
+            }
+        });
+        Dialog.setNegativeButton("Không", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        Dialog.show();
+    }
+
+    //TODO Tạo mới 1 bản điểm cho hs
+    private void TaoBanDiem(){
+        Call<String> callBack = dataClient.TaoBangDiem(mHocSinh.getmID());
+        callBack.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response != null){
+                    if (response.body().equals("Success")){
+                        Toast.makeText(MainActivity_DetailtHocSinh.this, "Thành công!", Toast.LENGTH_SHORT).show();
                     }else
                         Toast.makeText(MainActivity_DetailtHocSinh.this, "Thất bại", Toast.LENGTH_SHORT).show();
                 }
