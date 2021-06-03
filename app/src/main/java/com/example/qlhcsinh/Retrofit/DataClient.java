@@ -4,6 +4,7 @@ import com.example.qlhcsinh.Object.DiemHS;
 import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Object.InfoGV;
 import com.example.qlhcsinh.Object.TKB;
+import com.example.qlhcsinh.Object.ThongBao;
 import com.example.qlhcsinh.Object.User;
 
 import java.util.List;
@@ -115,4 +116,24 @@ public interface DataClient {
     @FormUrlEncoded
     @POST("SetDiem.php")
     Call<String> SetDiem(@Field("pKey_ID") int Key_ID, @Field("pD_Mieng") double D_Mieng, @Field("pD_15p") double D_15p, @Field("pD_1Tiet") double D_1Tiet, @Field("pD_HocKy") double D_HocKy);
+
+    //Add Thông báo
+    @FormUrlEncoded
+    @POST("AddThongBao.php")
+    Call<String> AddThongBao(@Field("pMSL") int MSL,
+                             @Field("pGV_Truong") String GV_Truong,
+                             @Field("pTenTB") String TenTB,
+                             @Field("pNoiDungTB") String NoiDungTB,
+                             @Field("pNgay") String Ngay,
+                             @Field("pCheck") int Check);
+
+    //Lấy Thông Báo
+    @FormUrlEncoded
+    @POST("GetTB.php")
+    Call<List<ThongBao>> GetTB(@Field("pMSL") int MSL);
+
+    //Lấy Thông Báo
+    @FormUrlEncoded
+    @POST("XoaTB.php")
+    Call<String> XoaTB(@Field("pKey_ID") int ID);
 }

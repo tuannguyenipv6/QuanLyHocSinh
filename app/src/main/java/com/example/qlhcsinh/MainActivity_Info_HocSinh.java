@@ -35,7 +35,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -43,12 +42,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.qlhcsinh.Adapter.AdapterHocSinh;
-import com.example.qlhcsinh.Fragment.FragmentHocTap;
+import com.example.qlhcsinh.Fragment.FragmentThongBao;
 import com.example.qlhcsinh.Fragment.FragmentTKB;
 import com.example.qlhcsinh.Object.HocSinh;
 import com.example.qlhcsinh.Object.InfoGV;
 import com.example.qlhcsinh.Object.OnClickItemHS;
-import com.example.qlhcsinh.Object.TKB;
 import com.example.qlhcsinh.Object.User;
 import com.example.qlhcsinh.Retrofit.DataClient;
 import com.example.qlhcsinh.Retrofit.UtilsAPI;
@@ -63,7 +61,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -115,7 +112,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     public static ProgressBar mProgressBar_Info;
 
     public static String Key_Lop = "";
-    String SDT_GV = "", Name_GV = "";
+    InfoGV infoGV = null;
 
     long backPressTinme;
     Toast mToast;
@@ -139,6 +136,9 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
 
         //TODO Set Info GV lên layout
         setInfoGV();
+        if (!userLogin.ismGV_PH()){
+            mFloatingActionButton.setImageResource(R.drawable.ic_setting_user);
+        }
 
 
         //TODO Set item HS cho RecyclerView
@@ -272,7 +272,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                     intent.putExtra("Key_MSL", userLogin.getmMSL());
                     startActivity(intent);
                 }else
-                    Toast.makeText(MainActivity_Info_HocSinh.this, "Phụ Huynh", Toast.LENGTH_SHORT).show();
+                    AllInfoGV();
             }
         });
     }
@@ -282,7 +282,11 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         //bắt sự kiện nút add (FloatingActionButton) khi đc gán vào menu
         if (item.getTitle() == "Add"){
-            Toast.makeText(MainActivity_Info_HocSinh.this, "Add menu", Toast.LENGTH_SHORT).show();
+            if (userLogin.ismGV_PH()){
+                SetTB();
+            }else {
+                AllInfoGV();
+            }
         }
         switch (item.getItemId()){
             //sự kiện oncick hiện menu drawable
@@ -301,8 +305,10 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (mMenu != null && (!isExpanded || mMenu.size() != 1)){
-            //gán nút add (FloatingActionButton) vào menu
-            mMenu.add("Add").setIcon(R.drawable.ic_add).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            //TODO gán nút add (FloatingActionButton) vào menu
+            if (userLogin.ismGV_PH()){
+                mMenu.add("Add").setIcon(R.drawable.ic_notification_add).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            }else mMenu.add("Add").setIcon(R.drawable.ic_setting_user).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         }
         return super.onPrepareOptionsMenu(mMenu);
     }
@@ -320,7 +326,7 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
         switch (item.getItemId()){
             case R.id.nav_DS_HS:
                 Fragment fragment = getSupportFragmentManager().findFragmentByTag("tkb");
-                Fragment fragment1 = getSupportFragmentManager().findFragmentByTag("hoctap");
+                Fragment fragment1 = getSupportFragmentManager().findFragmentByTag("thongbao");
                 if(fragment != null){
                     getSupportFragmentManager().beginTransaction().remove(fragment).commit();
                     CURENT_FRAGMENT = 1;
@@ -336,9 +342,9 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                     CURENT_FRAGMENT = FRAGMENT_TKB;
                 }
                 break;
-            case R.id.nav_HocTap:
+            case R.id.nav_ThongBao:
                 if (FRAGMENT_HOCTAP != CURENT_FRAGMENT){
-                    ReplaceFragment(new FragmentHocTap(), "hoctap");
+                    ReplaceFragment(new FragmentThongBao(), "thongbao");
                     CURENT_FRAGMENT = FRAGMENT_HOCTAP;
                 }
                 break;
@@ -489,24 +495,28 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
             intent.setType("image/*");
             startActivityForResult(intent, REQUEST_CODE_IMAGE);
         }else if (REQUEST_CODE_CALL == requestCode && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            if (SDT_GV.equals("matdinh")){
+            if (infoGV.getmSDT() != null){
+                if (infoGV.getmSDT().equals("matdinh")){
                 Toast.makeText(this, "GV Chưa thiếc lập SDT!", Toast.LENGTH_SHORT).show();
-            }else {
-                Intent intent1 =new Intent();
-                intent1.setAction(Intent.ACTION_CALL);
-                intent1.setData(Uri.parse("tel:" + SDT_GV));
-                startActivity(intent1);
-            }
+                }else {
+                    Intent intent1 =new Intent();
+                    intent1.setAction(Intent.ACTION_CALL);
+                    intent1.setData(Uri.parse("tel:" + infoGV.getmSDT()));
+                    startActivity(intent1);
+                }
+            }else Toast.makeText(this, "GV Chưa thiếc lập SDT hoặc Mã TK không hợp lệ", Toast.LENGTH_SHORT).show();
         }else if (REQUEST_CODE_SMS == requestCode && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            if (SDT_GV.equals("matdinh")){
+            if (infoGV.getmSDT() != null){
+                if (infoGV.getmSDT().equals("matdinh")){
                 Toast.makeText(this, "GV Chưa thiếc lập SDT!", Toast.LENGTH_SHORT).show();
-            }else {
-                Intent intent1 =new Intent();
-                intent1.setAction(Intent.ACTION_SENDTO);
-                intent1.putExtra("sms_body", "Giáo Viên: " + Name_GV + "\n");
-                intent1.setData(Uri.parse("sms:" + SDT_GV));
-                startActivity(intent1);
-            }
+                }else {
+                    Intent intent1 =new Intent();
+                    intent1.setAction(Intent.ACTION_SENDTO);
+                    intent1.putExtra("sms_body", "Giáo Viên: " + infoGV.getmName() + "\n");
+                    intent1.setData(Uri.parse("sms:" + infoGV.getmSDT()));
+                    startActivity(intent1);
+                }
+            }else Toast.makeText(this, "GV Chưa thiếc lập SDT hoặc Mã TK không hợp lệ", Toast.LENGTH_SHORT).show();
         }else Toast.makeText(MainActivity_Info_HocSinh.this, "Bạn chưa cấp quyền!", Toast.LENGTH_SHORT).show();
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -619,15 +629,13 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
             @Override
             public void onResponse(Call<InfoGV> call, Response<InfoGV> response) {
                 if (response != null){
-                    InfoGV infoGV = response.body();
+                    infoGV = response.body();
                     txtName_GV.setText(infoGV.getmName());
                     txtGmail_GV.setText(infoGV.getmGmail());
                     Picasso.get().load(infoGV.getmPhoto1()).placeholder(R.drawable.ic_hoa).error(R.drawable.ic_hoa).into(img_GV1);
                     Picasso.get().load(infoGV.getmPhoto2()).placeholder(R.drawable.ic_hoa).error(R.drawable.img_bia_hs).into(Img_GV2);
                     mCollapsingToolbarLayout.setTitle("Lớp: " + infoGV.getmTenLop());
                     Key_Lop = infoGV.getmTenLop();
-                    SDT_GV = infoGV.getmSDT();
-                    Name_GV = infoGV.getmName();
                 }
             }
 
@@ -709,9 +717,57 @@ public class MainActivity_Info_HocSinh extends AppCompatActivity implements Navi
                 mToast.show();
             }
             backPressTinme = System.currentTimeMillis();
-
-
-
         }
+    }
+
+    //TODO all info GV
+    private void AllInfoGV(){
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("GVCN");
+        dialog.setMessage("Lớp: " + fomatGV(infoGV.getmTenLop()) +
+                            "\nTên GVCN: " + fomatGV(infoGV.getmName()) +
+                            "\nGmail: " + fomatGV(infoGV.getmGmail()) +
+                            "\nSDT: " + fomatGV(infoGV.getmSDT()));
+        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        dialog.show();
+    }
+    //Dinh dạng
+    private String fomatGV(String value){
+        String result = "Chưa có!";
+        if (value != null){
+            if (!value.equals("matdinh") && value.length() > 0 && !value.equals("ERROR")){
+                result = value;
+            }
+        }
+        return result;
+    }
+
+    private void SetTB(){
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Xin Chào!");
+        dialog.setMessage("Bạn muốn tạo thông báo từ");
+        dialog.setPositiveButton("Nhà Trường", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(MainActivity_Info_HocSinh.this, MainActivity_AddThongBao.class);
+                intent.putExtra("Key_MSL", userLogin.getmMSL());
+                intent.putExtra("Key_SetTB", "Nhà Trường");
+                startActivity(intent);
+            }
+        });
+        dialog.setNegativeButton("Giáo viên", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(MainActivity_Info_HocSinh.this, MainActivity_AddThongBao.class);
+                intent.putExtra("Key_MSL", userLogin.getmMSL());
+                intent.putExtra("Key_SetTB", "Giáo Viên");
+                startActivity(intent);
+            }
+        });
+        dialog.show();
     }
 }

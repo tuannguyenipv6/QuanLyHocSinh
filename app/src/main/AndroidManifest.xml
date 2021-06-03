@@ -15,7 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QLHọcSinh"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity_Sua_Diem"></activity>
+        <activity android:name=".MainActivity_AddThongBao"></activity>
+        <activity android:name=".MainActivity_Sua_Diem" />
         <activity android:name=".MainActivity_DiemHocTap" />
         <activity android:name=".MainActivity_setTKB" />
         <activity android:name=".MainActivity_DetailtHocSinh" />

@@ -13,9 +13,9 @@
             android:icon="@drawable/ic_tkb1"
             android:title="Thời Khóa Biểu" />
         <item
-            android:id="@+id/nav_HocTap"
-            android:icon="@drawable/ic_sach1"
-            android:title="Học Tập" />
+            android:id="@+id/nav_ThongBao"
+            android:icon="@drawable/ic_notifications"
+            android:title="Thông Báo" />
     </group>
     <item android:title="Liên hệ GV">
         <menu>
